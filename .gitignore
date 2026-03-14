@@ -1,9 +1,7 @@
 # Ignore everything
 *
 
-# Except nvim directories
+# Except nvim
 !nvim/
 !nvim/**
-!nvim.*/
-!nvim.*/**
 !.gitignore
