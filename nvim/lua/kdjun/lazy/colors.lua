@@ -8,7 +8,8 @@ return {
 				return ok and out:match("Dark")
 			end
 			if vim.fn.executable("gsettings") == 1 then
-				local ok, out = pcall(vim.fn.system, { "gsettings", "get", "org.gnome.desktop.interface", "color-scheme" })
+				local ok, out =
+					pcall(vim.fn.system, { "gsettings", "get", "org.gnome.desktop.interface", "color-scheme" })
 				return ok and out:match("[dD]ark")
 			end
 			return false
@@ -18,7 +19,8 @@ return {
 			if is_dark_mode() then
 				vim.cmd.colorscheme("dracula_pro_van_helsing")
 			else
-				vim.cmd.colorscheme("dracula_pro_alucard")
+				vim.cmd.colorscheme("dracula_pro_van_helsing")
+				-- vim.cmd.colorscheme("dracula_pro_alucard")
 			end
 			vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 			vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })

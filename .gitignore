@@ -1,14 +1,35 @@
 # Ignore everything
 *
 
-# Except nvim
+# Except dotfiles repo files
+!.gitignore
+!setup.sh
+!Brewfile
+
+# Shell
+!.zshrc
+!zsh/
+!zsh/**
+
+# Git
+!git/
+!git/**
+
+# Neovim
 !nvim/
 !nvim/**
-!.gitignore
 
-# Except zshrc
-!.zshrc
-
-# Except ghostty config
+# Terminal
 !ghostty/
 !ghostty/config
+
+# Tmux
+!tmux/
+!tmux/tmux.conf
+
+# Starship
+!starship.toml
+
+# Atuin
+!atuin/
+!atuin/config.toml
