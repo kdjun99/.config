@@ -22,6 +22,8 @@
 # Terminal
 !ghostty/
 !ghostty/config
+!ghostty/themes/
+!ghostty/themes/**
 
 # Tmux
 !tmux/

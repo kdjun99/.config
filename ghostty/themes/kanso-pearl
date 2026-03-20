@@ -1,0 +1,33 @@
+# Kanso Pearl theme for Ghostty
+# Based on the kanso.nvim Pearl variant
+# Light theme for daytime productivity
+
+# ANSI colors (0-15)
+palette = 0=#f2f1ef
+palette = 1=#c4746e
+palette = 2=#6f894e
+palette = 3=#c4b28a
+palette = 4=#4d699b
+palette = 5=#624c83
+palette = 6=#8ea4a2
+palette = 7=#22262D
+palette = 8=#545464
+palette = 9=#c4746e
+palette = 10=#6f894e
+palette = 11=#b6927b
+palette = 12=#4d699b
+palette = 13=#624c83
+palette = 14=#949fb5
+palette = 15=#22262D
+
+# Main colors
+background = #f2f1ef
+foreground = #22262D
+
+# Cursor
+cursor-color = #4d699b
+cursor-text = #f2f1ef
+
+# Selection
+selection-background = #43436c
+selection-foreground = #f2f1ef

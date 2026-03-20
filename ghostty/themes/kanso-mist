@@ -1,0 +1,33 @@
+# Kanso Mist theme for Ghostty
+# Based on the kanso.nvim Mist variant  
+# Soft & muted dark theme with gentle contrast
+
+# ANSI colors (0-15)
+palette = 0=#22262D
+palette = 1=#c4746e
+palette = 2=#8a9a7b
+palette = 3=#c4b28a
+palette = 4=#8ba4b0
+palette = 5=#8992a7
+palette = 6=#8ea4a2
+palette = 7=#C5C9C7
+palette = 8=#75797f
+palette = 9=#c4746e
+palette = 10=#8a9a7b
+palette = 11=#b6927b
+palette = 12=#8ba4b0
+palette = 13=#8992a7
+palette = 14=#949fb5
+palette = 15=#C5C9C7
+
+# Main colors
+background = #22262D
+foreground = #C5C9C7
+
+# Cursor
+cursor-color = #8ba4b0
+cursor-text = #22262D
+
+# Selection
+selection-background = #2a2c35
+selection-foreground = #C5C9C7
