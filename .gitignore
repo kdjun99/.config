@@ -5,3 +5,10 @@
 !nvim/
 !nvim/**
 !.gitignore
+
+# Except zshrc
+!.zshrc
+
+# Except ghostty config
+!ghostty/
+!ghostty/config

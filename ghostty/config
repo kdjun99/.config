@@ -1,0 +1,37 @@
+#font-family = GeistMono Nerd Font Mono
+#font-family = Sarasa Mono K
+font-family = D2CodingLigature Nerd Font Mono
+#theme = dark:van-helsing, light:alucard
+theme = dark:van-helsing, light:van-helsing
+#theme = dark:Catppuccin Mocha, light: Catppuccin Latte
+cursor-style = block
+cursor-style-blink = true
+background-opacity = 0.8
+background-blur= true
+background-blur-radius = 20
+#background-image = /Users/dongjunkim/.config/ghostty/wallpapers/macos-monterey-stock-black-dark-mode-layers-5k-3840x2160-5889.jpg
+background-image-opacity = 1
+background-image-fit = cover
+background-image-position = center
+
+
+mouse-hide-while-typing = true
+
+window-padding-balance = true
+
+clipboard-read = allow
+clipboard-write = allow
+
+window-subtitle = false
+
+macos-icon = retro
+#macos-icon = custom-style
+#macos-icon=official
+#macos-icon = custom
+#macos-custom-icon = ~/.config/ghostty/dracula-pro-van-helsing.icns
+
+macos-icon-frame = plastic
+macos-icon-ghost-color = #292929
+macos-icon-screen-color = #292929
+macos-titlebar-style=transparent
+
