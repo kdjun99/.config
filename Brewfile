@@ -81,6 +81,8 @@ brew "mysql-client@8.0"
 brew "redis"
 brew "flyway"
 brew "duckdb"
+brew "pgcli"
+brew "mycli"
 
 # ─────────────────────────────
 # Server & Network
