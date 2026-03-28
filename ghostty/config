@@ -1,8 +1,10 @@
 #font-family = GeistMono Nerd Font Mono
 #font-family = Sarasa Mono K
 font-family = D2CodingLigature Nerd Font Mono
-#theme = dark:van-helsing, light:alucard
-theme = dark:van-helsing, light:van-helsing
+theme = dark:van-helsing, light:alucard
+# theme = dark:van-helsing, light:van-helsing
+#theme = dark:Kanagawa Dragon, light:Kanagawa Dragon
+#theme = dark:Kanso Ink, light:Kanso Ink
 #theme = dark:Catppuccin Mocha, light: Catppuccin Latte
 cursor-style = block
 cursor-style-blink = true

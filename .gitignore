@@ -1,6 +1,11 @@
 # Ignore everything
 *
 
+# Always ignore these
+.DS_Store
+*.swp
+*.swo
+
 # Except dotfiles repo files
 !.gitignore
 !setup.sh
