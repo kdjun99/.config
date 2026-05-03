@@ -13,7 +13,7 @@ alias ll="ls -al"
 alias nv="nvim"
 alias la="tree"
 alias nvuse="nvm use"
-alias cx="codex"
+alias cx="$HOME/.codex/codex-theme-wrapper.sh"
 alias lz="lazygit"
 alias rosetta-zsh='arch -x86_64 zsh'
 

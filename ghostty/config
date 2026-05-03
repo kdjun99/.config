@@ -2,6 +2,18 @@
 #font-family = Sarasa Mono K
 font-family = D2CodingLigature Nerd Font Mono
 theme = dark:van-helsing, light:alucard
+
+# Pi: send Option+Backspace as Esc+DEL so word-delete works reliably.
+keybind = alt+backspace=text:\x1b\x7f
+
+# Best-effort Ctrl+A pass-through. Ghostty 1.3.x on macOS can miss Ctrl+letter
+# while CJK IME is active, so the reliable Korean-mode workaround lives in
+# ~/.config/karabiner/karabiner.json and maps Ctrl+A -> F12 for tmux prefix2.
+keybind = ctrl+key_a=text:\x01
+keybind = ctrl+ㅁ=text:\x01
+# Karabiner maps Korean-mode Ctrl+A to Ctrl+Backslash; force Ghostty to emit
+# the Ctrl-\\ control byte so tmux prefix2 can catch it.
+keybind = ctrl+backslash=text:\x1c
 # theme = dark:van-helsing, light:van-helsing
 #theme = dark:Kanagawa Dragon, light:Kanagawa Dragon
 #theme = dark:Kanso Ink, light:Kanso Ink
@@ -26,14 +38,12 @@ clipboard-write = allow
 
 window-subtitle = false
 
-macos-icon = retro
+macos-icon = custom
 #macos-icon = custom-style
 #macos-icon=official
-#macos-icon = custom
-#macos-custom-icon = ~/.config/ghostty/dracula-pro-van-helsing.icns
+macos-custom-icon = /Users/dongjunkim/.config/ghostty/icons/Kasumi.icns
 
 macos-icon-frame = plastic
 macos-icon-ghost-color = #292929
 macos-icon-screen-color = #292929
 macos-titlebar-style=transparent
-
