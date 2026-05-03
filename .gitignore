@@ -6,6 +6,10 @@
 *.swp
 *.swo
 
+# Secrets — never commit. Redundant with `*` above but explicit for safety.
+secrets/
+secrets/**
+
 # Except dotfiles repo files
 !.gitignore
 !setup.sh
@@ -40,3 +44,7 @@
 # Atuin
 !atuin/
 !atuin/config.toml
+
+# Re-deny noise that whitelisted directories above accidentally re-include
+**/.omc/
+**/.DS_Store
