@@ -1,6 +1,7 @@
 require("kdjun.remap")
 require("kdjun.lazy_init")
 require("kdjun.set")
+require("kdjun.devflow").setup()
 
 local augroup = vim.api.nvim_create_augroup
 local autocmd = vim.api.nvim_create_autocmd

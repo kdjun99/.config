@@ -69,9 +69,13 @@ return {
 			"williamboman/mason.nvim",
 			"j-hui/fidget.nvim",
 			"saghen/blink.cmp",
+			"yioneko/nvim-vtsls",
 		},
 		config = function()
 			local capabilities = require("blink.cmp").get_lsp_capabilities()
+
+			-- nvim-vtsls: registers `:VtsExec` user command and command helpers
+			require("vtsls").config({})
 
 			-- vtsls
 			local ts_settings = {
@@ -140,17 +144,77 @@ return {
 			vim.api.nvim_create_autocmd("LspAttach", {
 				callback = function(ev)
 					local opts = { buffer = ev.buf, remap = false }
-					vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
-					vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
-					vim.keymap.set("n", "<leader>vws", function() vim.lsp.buf.workspace_symbol() end, opts)
-					vim.keymap.set("n", "<leader>vd", function() vim.diagnostic.open_float() end, opts)
-					vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
-					vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
-					vim.keymap.set("n", "<leader>vca", function() vim.lsp.buf.code_action() end, opts)
-					vim.keymap.set("n", "<leader>vrr", function() vim.lsp.buf.references() end, opts)
-					vim.keymap.set("n", "<leader>vrn", function() vim.lsp.buf.rename() end, opts)
+					local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+					-- vtsls smart `gd`: textDocument/definition + auto-follow-through.
+					-- Standard definition is used (works on any TS version, no crash).
+					-- If the result lands on an `import` line in the same file, we
+					-- chain another definition call from there to follow through to
+					-- the actual source location. This avoids `goToSourceDefinition`
+					-- entirely (which requires TS 4.7+ and crashes vtsls 0.3.0 on
+					-- TypeScript < 4.7 projects like linkareer-main).
+					if client and client.name == "vtsls" then
+						vim.keymap.set("n", "gd", function()
+							local origin_buf = vim.api.nvim_get_current_buf()
+							local origin_line = vim.api.nvim_win_get_cursor(0)[1]
+
+							vim.lsp.buf.definition({
+								on_list = function(options)
+									local items = options.items or {}
+									if #items == 0 then
+										return
+									end
+									local first = items[1]
+									local origin_filename = vim.api.nvim_buf_get_name(origin_buf)
+									local same_buf = (first.bufnr == origin_buf)
+										or (first.filename == origin_filename)
+									local follow_through = false
+
+									if same_buf and first.lnum ~= origin_line then
+										local line = vim.api.nvim_buf_get_lines(
+											origin_buf, first.lnum - 1, first.lnum, false
+										)[1] or ""
+										if line:match("^%s*import%s") then
+											follow_through = true
+										end
+									end
+
+									if follow_through then
+										-- Jump to import line, then chain another definition call.
+										vim.cmd("normal! m'") -- save jumplist
+										vim.api.nvim_win_set_cursor(0, {
+											first.lnum,
+											math.max(first.col - 1, 0),
+										})
+										vim.schedule(function()
+											vim.lsp.buf.definition()
+										end)
+									else
+										-- Default behavior: jump for single, quickfix for multiple.
+										if #items == 1 then
+											vim.cmd("normal! m'")
+											local target_buf = first.bufnr or vim.fn.bufadd(first.filename)
+											vim.bo[target_buf].buflisted = true
+											vim.api.nvim_win_set_buf(0, target_buf)
+											vim.api.nvim_win_set_cursor(0, {
+												first.lnum,
+												math.max(first.col - 1, 0),
+											})
+										else
+											vim.fn.setqflist({}, " ", options)
+											vim.cmd("botright copen")
+										end
+									end
+								end,
+							})
+						end, opts)
+					end
+
+					-- Builtin (0.11): gd=definition, K=hover, grr=references, grn=rename, gra=code_action, gri=implementation
+					vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.workspace_symbol() end, opts)
+					vim.keymap.set("n", "<leader>ld", function() vim.diagnostic.open_float() end, opts)
+					vim.keymap.set("n", "<leader>ll", "<cmd>Telescope diagnostics<CR>", opts)
 					vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
-					vim.keymap.set("n", "<leader>vl", "<cmd>Telescope diagnostics<CR>", opts)
 				end,
 			})
 

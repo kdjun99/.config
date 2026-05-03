@@ -13,6 +13,7 @@ return {
 		config = function()
 			require("mini.surround").setup()
 			require("mini.pairs").setup()
+			require("mini.comment").setup()
 		end,
 	},
 	{ "NMAC427/guess-indent.nvim", opts = {} },
