@@ -1,0 +1,186 @@
+#!/bin/sh
+# Auto-add AI agent co-author trailers when commits are created from agent sessions.
+# Override defaults:
+#   git config --global ai.coauthor.claude "Claude <noreply@anthropic.com>"
+#   git config --global ai.coauthor.codex  "Codex <OFFICIAL_EMAIL>"
+#   git config --global ai.coauthor.pi     "pi <OFFICIAL_EMAIL>"
+# Manual controls:
+#   AI_COMMIT_AGENT=pi git commit
+#   AI_COMMIT_COAUTHORS=pi,codex git commit
+#   AI_COMMIT_NO_COAUTHOR=1 git commit
+
+set -eu
+
+msg_file=${1:-}
+source=${2:-}
+
+[ -n "$msg_file" ] || exit 0
+[ -f "$msg_file" ] || exit 0
+[ "${AI_COMMIT_NO_COAUTHOR:-}" = "1" ] && exit 0
+
+# Avoid adding trailers to merge/squash commits unless explicitly requested.
+case "$source" in
+  merge|squash)
+    [ -n "${AI_COMMIT_AGENT:-}${AI_COMMIT_COAUTHORS:-}" ] || exit 0
+    ;;
+esac
+
+append_unique_word() {
+  list=$1
+  word=$2
+
+  [ -n "$word" ] || {
+    printf '%s' "$list"
+    return
+  }
+
+  case " $list " in
+    *" $word "*) printf '%s' "$list" ;;
+    *)
+      if [ -n "$list" ]; then
+        printf '%s %s' "$list" "$word"
+      else
+        printf '%s' "$word"
+      fi
+      ;;
+  esac
+}
+
+process_chain_contains() {
+  pattern=$1
+  pid=$PPID
+  depth=0
+
+  while [ -n "${pid:-}" ] && [ "$pid" -gt 1 ] && [ "$depth" -lt 30 ]; do
+    command_line=$(ps -o command= -p "$pid" 2>/dev/null || true)
+    if printf '%s\n' "$command_line" | grep -Eiq "$pattern"; then
+      return 0
+    fi
+
+    next_pid=$(ps -o ppid= -p "$pid" 2>/dev/null | tr -d '[:space:]' || true)
+    [ -n "$next_pid" ] || break
+    [ "$next_pid" != "$pid" ] || break
+    pid=$next_pid
+    depth=$((depth + 1))
+  done
+
+  return 1
+}
+
+detect_agents() {
+  agents=""
+
+  if [ -n "${AI_COMMIT_COAUTHORS:-}" ]; then
+    old_ifs=$IFS
+    IFS=','
+    for agent in $AI_COMMIT_COAUTHORS; do
+      agent=$(printf '%s' "$agent" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+      agents=$(append_unique_word "$agents" "$agent")
+    done
+    IFS=$old_ifs
+    printf '%s' "$agents"
+    return
+  fi
+
+  if [ -n "${AI_COMMIT_AGENT:-}" ]; then
+    agent=$(printf '%s' "$AI_COMMIT_AGENT" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+    printf '%s' "$agent"
+    return
+  fi
+
+  if process_chain_contains '(^|[/[:space:]])pi([[:space:]]|$)|pi-coding-agent' || [ "${PI_CODING_AGENT:-}" = "true" ]; then
+    agents=$(append_unique_word "$agents" "pi")
+  fi
+
+  if process_chain_contains '(^|[/[:space:]])codex([[:space:]]|$)|codex-cli' || [ -n "${CODEX_SANDBOX:-}${CODEX_CLI:-}${CODEX_SESSION_ID:-}" ]; then
+    agents=$(append_unique_word "$agents" "codex")
+  fi
+
+  # Intentionally ignore weak CLAUDE_* environment hints such as CLAUDE_PACKAGE_MANAGER.
+  if process_chain_contains '(^|[/[:space:]])claude([[:space:]]|$)|claude-code' || [ -n "${CLAUDECODE:-}${CLAUDE_CODE_SESSION_ID:-}" ]; then
+    agents=$(append_unique_word "$agents" "claude")
+  fi
+
+  printf '%s' "$agents"
+}
+
+coauthor_for_agent() {
+  agent=$1
+  configured=$(git config --get "ai.coauthor.$agent" 2>/dev/null || true)
+  if [ -n "$configured" ]; then
+    printf '%s' "$configured"
+    return
+  fi
+
+  case "$agent" in
+    claude|claude-code)
+      printf '%s' 'Claude <noreply@anthropic.com>'
+      ;;
+    codex)
+      printf '%s' 'Codex <codex@openai.com>'
+      ;;
+    pi)
+      printf '%s' 'pi <pi@ai.local>'
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+trailer_already_present() {
+  trailer=$1
+  file=$2
+
+  awk -v expected="$trailer" '
+    BEGIN { expected = tolower(expected); found = 0 }
+    {
+      line = $0
+      sub(/^[[:space:]]+/, "", line)
+      if (tolower(line) == expected) found = 1
+    }
+    END { exit(found ? 0 : 1) }
+  ' "$file"
+}
+
+agents=$(detect_agents)
+[ -n "$agents" ] || exit 0
+
+trailers=""
+for agent in $agents; do
+  coauthor=$(coauthor_for_agent "$agent" || true)
+  [ -n "${coauthor:-}" ] || continue
+  trailer="Co-authored-by: $coauthor"
+
+  if trailer_already_present "$trailer" "$msg_file"; then
+    continue
+  fi
+
+  if [ -n "$trailers" ]; then
+    trailers=$(printf '%s\n%s' "$trailers" "$trailer")
+  else
+    trailers=$trailer
+  fi
+done
+
+[ -n "$trailers" ] || exit 0
+
+tmp_file=$(mktemp "${TMPDIR:-/tmp}/prepare-commit-msg.XXXXXX")
+awk -v trailers="$trailers" '
+  BEGIN { inserted = 0 }
+  /^# --- COMMIT END ---$/ && inserted == 0 {
+    print ""
+    print trailers
+    inserted = 1
+  }
+  { print }
+  END {
+    if (inserted == 0) {
+      print ""
+      print trailers
+    }
+  }
+' "$msg_file" > "$tmp_file"
+
+cat "$tmp_file" > "$msg_file"
+rm -f "$tmp_file"

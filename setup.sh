@@ -170,9 +170,11 @@ phase_symlinks() {
     fi
   done
 
-  # Git commit template
+  # Git commit template & global hooks
   git config --global commit.template "$DOTFILES_DIR/git/gitmessage.txt"
+  git config --global core.hooksPath "$DOTFILES_DIR/git/hooks"
   ok "Git commit template configured"
+  ok "Git hooks path configured"
 }
 
 # ─────────────────────────────

@@ -1,6 +1,6 @@
 #font-family = GeistMono Nerd Font Mono
 #font-family = Sarasa Mono K
-font-family = D2CodingLigature Nerd Font Mono
+font-family = Google Sans Code
 theme = dark:van-helsing, light:alucard
 
 # Pi: send Option+Backspace as Esc+DEL so word-delete works reliably.

@@ -211,6 +211,26 @@ return {
 					end
 
 					-- Builtin (0.11): gd=definition, K=hover, grr=references, grn=rename, gra=code_action, gri=implementation
+					local telescope_builtin = require("telescope.builtin")
+					local telescope_themes = require("telescope.themes")
+					local telescope_lsp_references = function()
+						local picker_width = math.floor(vim.o.columns * 0.95)
+						local fname_width = math.floor(picker_width * 0.5)
+
+						telescope_builtin.lsp_references(telescope_themes.get_dropdown({
+							include_declaration = false,
+							show_line = true,
+							trim_text = true,
+							fname_width = fname_width,
+							layout_config = {
+								width = 0.95,
+								height = 0.65,
+							},
+						}))
+					end
+
+					vim.keymap.set("n", "grr", telescope_lsp_references, opts)
+					vim.keymap.set("n", "<leader>lr", telescope_lsp_references, opts)
 					vim.keymap.set("n", "<leader>ls", function() vim.lsp.buf.workspace_symbol() end, opts)
 					vim.keymap.set("n", "<leader>ld", function() vim.diagnostic.open_float() end, opts)
 					vim.keymap.set("n", "<leader>ll", "<cmd>Telescope diagnostics<CR>", opts)
