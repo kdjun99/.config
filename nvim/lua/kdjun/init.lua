@@ -12,13 +12,30 @@ local kdjunGroup = augroup("kdjun", {})
 autocmd("TextYankPost", {
     group = kdjunGroup,
     callback = function()
-        vim.highlight.on_yank({ higroup = "IncSearch", timeout = 150 })
+        vim.hl.on_yank({ higroup = "IncSearch", timeout = 150 })
+    end,
+})
+
+-- Markdown: prose, not code — no 80-col guide, soft-wrap long lines
+autocmd("FileType", {
+    group = kdjunGroup,
+    pattern = "markdown",
+    callback = function()
+        vim.opt_local.colorcolumn = ""
+        vim.opt_local.wrap = true
+        vim.opt_local.linebreak = true
     end,
 })
 
 -- Trim trailing whitespace on save
+-- (markdown excluded: two trailing spaces are a hard line break)
 autocmd("BufWritePre", {
     group = kdjunGroup,
     pattern = "*",
-    command = [[%s/\s\+$//e]],
+    callback = function()
+        if vim.bo.filetype == "markdown" then
+            return
+        end
+        vim.cmd([[%s/\s\+$//e]])
+    end,
 })

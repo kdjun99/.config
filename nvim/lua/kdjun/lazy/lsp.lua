@@ -211,14 +211,15 @@ return {
 					end
 
 					-- Builtin (0.11): gd=definition, K=hover, grr=references, grn=rename, gra=code_action, gri=implementation
-					local telescope_builtin = require("telescope.builtin")
-					local telescope_themes = require("telescope.themes")
 					local telescope_lsp_references = function()
+						local pickers = require("telescope.pickers")
+						local finders = require("telescope.finders")
+						local conf = require("telescope.config").values
+						local make_entry = require("telescope.make_entry")
+						local themes = require("telescope.themes")
 						local picker_width = math.floor(vim.o.columns * 0.95)
 						local fname_width = math.floor(picker_width * 0.5)
-
-						telescope_builtin.lsp_references(telescope_themes.get_dropdown({
-							include_declaration = false,
+						local picker_opts = themes.get_dropdown({
 							show_line = true,
 							trim_text = true,
 							fname_width = fname_width,
@@ -226,7 +227,34 @@ return {
 								width = 0.95,
 								height = 0.65,
 							},
-						}))
+						})
+
+						-- Use the Neovim 0.11 references API so each client supplies its
+						-- own offset_encoding. Telescope 0.1.8 calls make_position_params
+						-- without it, which emits a warning on references lookup.
+						vim.lsp.buf.references({ includeDeclaration = false }, {
+							on_list = function(list)
+								local items = list.items or {}
+								if vim.tbl_isempty(items) then
+									vim.notify("No references found")
+									return
+								end
+
+								pickers
+									.new(picker_opts, {
+										prompt_title = "LSP References",
+										finder = finders.new_table({
+											results = items,
+											entry_maker = make_entry.gen_from_quickfix(picker_opts),
+										}),
+										previewer = conf.qflist_previewer(picker_opts),
+										sorter = conf.generic_sorter(picker_opts),
+										push_cursor_on_edit = true,
+										push_tagstack_on_edit = true,
+									})
+									:find()
+							end,
+						})
 					end
 
 					vim.keymap.set("n", "grr", telescope_lsp_references, opts)

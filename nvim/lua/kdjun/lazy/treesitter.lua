@@ -17,7 +17,9 @@ return {
 			indent = { enable = true },
 			highlight = {
 				enable = true,
-				additional_vim_regex_highlighting = { "markdown" },
+				-- render-markdown.nvim conflicts with regex-based markdown
+				-- highlighting; pure treesitter highlighting is required.
+				additional_vim_regex_highlighting = false,
 			},
 			textobjects = {
 				select = {

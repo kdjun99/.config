@@ -2,10 +2,17 @@ return {
 	"stevearc/conform.nvim",
 	opts = {
 		notify_on_error = false,
-		format_on_save = {
-			timeout_ms = 500,
-			lsp_format = "fallback",
-		},
+		-- Markdown is excluded from autoformat so prettier doesn't rewrite
+		-- notes on save; manual <leader>f formatting still works.
+		format_on_save = function(bufnr)
+			if vim.bo[bufnr].filetype == "markdown" then
+				return nil
+			end
+			return {
+				timeout_ms = 500,
+				lsp_format = "fallback",
+			}
+		end,
 		formatters_by_ft = {
 			lua = { "stylua" },
 			javascript = { "prettier" },
@@ -17,7 +24,7 @@ return {
 			css = { "prettier" },
 			yaml = { "prettier" },
 			markdown = { "prettier" },
-			python = { "black" },
+			python = { "ruff_format" },
 			go = { "gofumpt" },
 		},
 	},
